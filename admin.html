@@ -2,87 +2,127 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel ADM Setorial</title>
+    <title>OnnoLog ADM</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .login-box { max-width: 300px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
-        .dash { display: none; max-width: 800px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ddd; }
-        button { background: #003366; color: white; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; }
+        :root { --p: #6366f1; --s: #22c55e; --e: #ef4444; --bg: #f8fafc; --dark: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--dark); padding: 40px; margin: 0; }
+        .dashboard { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-top: 4px solid var(--p); }
+        .card.success { border-top-color: var(--s); }
+        .card.error { border-top-color: var(--e); }
+        .full { grid-column: span 4; }
+        .half { grid-column: span 2; }
+        .label { font-size: 14px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .value { font-size: 32px; font-weight: 700; display: block; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 12px; overflow: hidden; }
+        th { background: #f1f5f9; text-align: left; padding: 16px; font-size: 13px; color: #64748b; }
+        td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .btn { background: var(--p); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 10px; }
+        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; }
+        .q-item { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .del-q { color: var(--e); cursor: pointer; border: none; background: none; font-size: 11px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="login" class="login-box">
-        <h2>ADM OnnoLog</h2>
-        <input type="text" id="setor" placeholder="Setor">
-        <input type="password" id="senha" placeholder="Senha">
-        <button onclick="logar()">ENTRAR</button>
+<div class="dashboard">
+    <div class="card"><span class="label">Participantes</span><span class="value" id="st-total">0</span></div>
+    <div class="card"><span class="label">Média Global</span><span class="value" id="st-avg">0</span></div>
+    <div class="card success"><span class="label">% Acerto Real</span><span class="value" id="st-hit" style="color:var(--s)">0%</span></div>
+    <div class="card error"><span class="label">% Erro Real</span><span class="value" id="st-miss" style="color:var(--e)">0%</span></div>
+
+    <div class="card half">
+        <h3 style="margin-top:0">Nova Pergunta</h3>
+        <input type="text" id="new-q" placeholder="Texto da Pergunta">
+        <input type="text" id="new-o1" placeholder="Opção CORRETA" style="border-left: 4px solid var(--s)">
+        <input type="text" id="new-o2" placeholder="Opção Errada 1" style="border-left: 4px solid var(--e)">
+        <input type="text" id="new-o3" placeholder="Opção Errada 2" style="border-left: 4px solid var(--e)">
+        <input type="text" id="new-o4" placeholder="Opção Errada 3" style="border-left: 4px solid var(--e)">
+        <button class="btn" onclick="addQuestion()">ADICIONAR PERGUNTA</button>
     </div>
 
-    <div id="dash" class="dash">
-        <div style="display:flex; justify-content: space-between;">
-            <h1 id="titulo">Painel</h1>
-            <button onclick="location.reload()" style="width: 80px; background: red;">SAIR</button>
-        </div>
-
-        <div class="card">
-            <h3>Cadastrar Pergunta</h3>
-            <input type="text" id="p" placeholder="Pergunta">
-            <input type="text" id="c" placeholder="Opção Correta">
-            <input type="text" id="e" placeholder="Opção Errada">
-            <button onclick="addP()">SALVAR PERGUNTA</button>
-        </div>
-
-        <div class="card">
-            <h3>Ranking do Setor</h3>
-            <table id="tabela">
-                <thead><tr><th>Nome</th><th>Pontos</th><th>Acertos</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    <div class="card half">
+        <h3 style="margin-top:0">Perguntas Ativas</h3>
+        <div id="q-list" style="max-height: 250px; overflow-y: auto; font-size: 13px;">Carregando...</div>
     </div>
 
-    <script>
-        const _supabase = supabase.createClient('https://zdthxlhknxpbdfzcozls.supabase.co', 'sb_publishable_6gT5fcstwt1QLjCf5PCAPA_2Ec_6mU4');
-        let setorAtivo = "";
+    <div class="card full">
+        <h3 style="margin-top:0">Desempenho (Rondonópolis)</h3>
+        <table id="rank-table">
+            <thead><tr><th>Nome</th><th>Pontos</th><th>Acertos</th><th>Horário</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <button onclick="clearRanking()" style="background:none; border:none; color:var(--e); cursor:pointer; margin-top:20px; font-size:12px;">ZERAR TODOS OS RESULTADOS</button>
+    </div>
+</div>
 
-        async function logar() {
-            const s = document.getElementById('setor').value;
-            const p = document.getElementById('senha').value;
-            const { data } = await _supabase.from('gestores').select('*').eq('setor', s).eq('senha', p).single();
+<script>
+    const _supabase = supabase.createClient('https://zdthxlhknxpbdfzcozls.supabase.co', 'sb_publishable_6gT5fcstwt1QLjCf5PCAPA_2Ec_6mU4');
 
-            if(data) {
-                setorAtivo = s;
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('dash').style.display = 'block';
-                document.getElementById('titulo').innerText = "ADM: " + s;
-                carregar();
-            } else alert("Acesso inválido!");
-        }
-
-        async function carregar() {
-            const { data } = await _supabase.from('ranking').select('*').eq('setor', setorAtivo).order('pontos', {ascending:false});
-            const { data: q } = await _supabase.from('perguntas').select('*').eq('setor', setorAtivo);
-            const totalQ = q ? q.length : 0;
-            
-            document.querySelector('#tabela tbody').innerHTML = data.map(r => `
-                <tr><td>${r.nome}</td><td>${r.pontos}</td><td>${r.acertos_reais}/${totalQ}</td></tr>
+    async function load() {
+        const { data: qs } = await _supabase.from('perguntas').select('*');
+        const { data: rs } = await _supabase.from('ranking').select('*').order('pontos', { ascending: false });
+        
+        if(qs) {
+            document.getElementById('q-list').innerHTML = qs.map(q => `
+                <div class="q-item">
+                    <span>${q.pergunta}</span>
+                    <button class="del-q" onclick="deleteQuestion(${q.id})">EXCLUIR</button>
+                </div>
             `).join('');
         }
+        if(rs) renderStats(rs, qs ? qs.length : 0);
+    }
 
-        async function addP() {
-            const per = document.getElementById('p').value;
-            const cor = document.getElementById('c').value;
-            const err = document.getElementById('e').value;
-            await _supabase.from('perguntas').insert([{ pergunta: per, opcoes: [cor, err], correta: 0, setor: setorAtivo }]);
-            alert("Pergunta salva!");
-            carregar();
+    function renderStats(data, totalQ) {
+        const total = data.length;
+        document.getElementById('st-total').innerText = total;
+        const avg = total > 0 ? Math.round(data.reduce((a, b) => a + b.pontos, 0) / total) : 0;
+        document.getElementById('st-avg').innerText = avg;
+
+        const hits = data.reduce((a, b) => a + (b.acertos_reais || 0), 0);
+        const totalPossible = total * totalQ;
+        const perc = totalPossible > 0 ? Math.round((hits / totalPossible) * 100) : 0;
+
+        document.getElementById('st-hit').innerText = perc + "%";
+        document.getElementById('st-miss').innerText = (total > 0 ? 100 - perc : 0) + "%";
+
+        document.querySelector('#rank-table tbody').innerHTML = data.map(s => {
+            const time = s.criado_em ? new Date(s.criado_em).toLocaleString("pt-BR", {timeZone: "America/Cuiaba"}) : "---";
+            return `<tr><td><b>${s.nome}</b></td><td>${s.pontos} pts</td><td>${s.acertos_reais || 0}/${totalQ}</td><td>${time}</td></tr>`;
+        }).join('');
+    }
+
+    async function addQuestion() {
+        const q = document.getElementById('new-q').value;
+        const o1 = document.getElementById('new-o1').value;
+        const o2 = document.getElementById('new-o2').value;
+        const o3 = document.getElementById('new-o3').value;
+        const o4 = document.getElementById('new-o4').value;
+
+        if(!q || !o1 || !o2 || !o3 || !o4) return alert("Por favor, preencha a pergunta e todas as 4 opções!");
+
+        const { error } = await _supabase.from('perguntas').insert([{ 
+            pergunta: q, 
+            opcoes: [o1, o2, o3, o4], 
+            correta: 0 
+        }]);
+
+        if(error) alert("Erro ao salvar: " + error.message);
+        else location.reload();
+    }
+
+    async function deleteQuestion(id) {
+        if(confirm("Deseja realmente excluir esta pergunta?")) {
+            await _supabase.from('perguntas').delete().eq('id', id);
+            load();
         }
-    </script>
+    }
+
+    async function clearRanking() { if(confirm("Zerar ranking?")) { await _supabase.from('ranking').delete().neq('id', 0); load(); } }
+    
+    load();
+</script>
 </body>
 </html>
