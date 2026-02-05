@@ -3,151 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnnoLog ADM - Premium</title>
+    <title>OnnoLog Pro | Enterprise Management</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --p: #6366f1; 
-            --s: #10b981; 
-            --e: #f43f5e; 
-            --dark: #0f172a; 
+            --primary: #818cf8; 
+            --success: #10b981; 
+            --error: #f43f5e; 
+            --bg: #020617; 
+            --card-bg: rgba(15, 23, 42, 0.7);
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
-            /* Fundo Animado com Gradiente */
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
-            background-size: 400% 400%;
-            animation: gradientBg 15s ease infinite;
+            background: radial-gradient(circle at top right, #1e1b4b, #020617);
+            background-attachment: fixed;
             color: #f8fafc; 
             min-height: 100vh;
-            padding: 40px 20px; 
             margin: 0; 
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 50px;
         }
 
-        @keyframes gradientBg {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* Header & Nav */
+        .header { width: 100%; max-width: 1100px; padding: 40px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-tabs { display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px; margin-bottom: 30px; }
+        .nav-btn { 
+            padding: 10px 20px; border: none; background: none; color: #64748b; 
+            cursor: pointer; font-weight: 600; border-radius: 8px; transition: 0.3s;
         }
+        .nav-btn.active { background: rgba(255,255,255,0.1); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
-        .dashboard { 
-            max-width: 1100px; 
-            width: 100%;
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 20px; 
-        }
+        .container { width: 100%; max-width: 1100px; padding: 0 20px; }
+        .panel { display: none; animation: fadeIn 0.4s ease-out; }
+        .panel.active { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
-        /* Glassmorphism Card */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Estilo dos Cards */
         .card { 
-            background: rgba(255, 255, 255, 0.05); 
-            backdrop-filter: blur(16px); 
-            -webkit-backdrop-filter: blur(16px);
-            padding: 24px; 
-            border-radius: 24px; 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 24px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08);
         }
-
-        .card:hover { transform: translateY(-5px); border-color: rgba(255, 255, 255, 0.2); }
-
-        .card.success { border-top: 4px solid var(--s); }
-        .card.error { border-top: 4px solid var(--e); }
-
         .full { grid-column: span 4; }
         .half { grid-column: span 2; }
+        .label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .value { font-size: 32px; font-weight: 800; display: block; margin-top: 5px; }
 
-        @media (max-width: 768px) {
-            .half, .card { grid-column: span 4; }
-        }
+        /* BI Report Styles */
+        .bi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; width: 100%; }
+        .insight-card { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(15, 23, 42, 0.8)); border-left: 4px solid var(--primary); }
 
-        .label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        .value { font-size: 36px; font-weight: 800; display: block; margin-top: 8px; color: #fff; }
-
-        /* Tabela Estilizada */
-        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 15px; }
-        th { text-align: left; padding: 12px 16px; font-size: 13px; color: #94a3b8; }
-        td { padding: 16px; background: rgba(255, 255, 255, 0.03); font-size: 14px; border: none; color: #e2e8f0; }
-        td:first-child { border-radius: 12px 0 0 12px; }
-        td:last-child { border-radius: 0 12px 12px 0; }
-        tr:hover td { background: rgba(255, 255, 255, 0.07); }
-
-        .btn { 
-            background: linear-gradient(135deg, var(--p), #4f46e5); 
-            color: white; border: none; padding: 14px; border-radius: 12px; 
-            cursor: pointer; font-weight: 700; width: 100%; margin-top: 15px;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-            transition: all 0.3s;
-        }
-        .btn:hover { filter: brightness(1.2); transform: scale(1.01); }
-
+        /* Inputs e Botões */
         input { 
-            width: 100%; padding: 12px; margin: 10px 0; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 10px; box-sizing: border-box; 
-            background: rgba(0,0,0,0.3); color: white;
-            outline: none; transition: 0.3s;
+            width: 100%; padding: 14px; margin: 8px 0; border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; background: rgba(0,0,0,0.2); color: white;
         }
-        input:focus { border-color: var(--p); background: rgba(0,0,0,0.4); }
+        .btn-main { 
+            background: #fff; color: #000; border: none; padding: 16px; border-radius: 12px; 
+            cursor: pointer; font-weight: 700; width: 100%; margin-top: 10px; transition: 0.3s;
+        }
+        .btn-main:hover { transform: translateY(-2px); }
 
-        .q-item { 
-            padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); 
-            display: flex; justify-content: space-between; align-items: center; 
-        }
-        .del-q { color: var(--e); cursor: pointer; border: none; background: none; font-size: 11px; font-weight: bold; opacity: 0.6; }
-        .del-q:hover { opacity: 1; }
-        
-        #q-list::-webkit-scrollbar { width: 6px; }
-        #q-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        /* Tabela */
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        td { padding: 16px; background: rgba(255, 255, 255, 0.03); border: none; color: #e2e8f0; }
+        td:first-child { border-radius: 12px 0 0 12px; font-weight: 600; }
+        td:last-child { border-radius: 0 12px 12px 0; }
+
+        .q-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; }
+        .del-q { color: var(--error); cursor: pointer; border: none; background: none; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="card"><span class="label">Participantes</span><span class="value" id="st-total">0</span></div>
-    <div class="card"><span class="label">Média Global</span><span class="value" id="st-avg">0</span></div>
-    <div class="card success"><span class="label">% Acerto Real</span><span class="value" id="st-hit" style="color:var(--s)">0%</span></div>
-    <div class="card error"><span class="label">% Erro Real</span><span class="value" id="st-miss" style="color:var(--e)">0%</span></div>
+<div class="header">
+    <div>
+        <h1 style="margin:0; font-size: 24px; letter-spacing: -1px;">OnnoLog <span style="font-weight:300; color:var(--primary)">Pro</span></h1>
+        <p style="margin:0; color: #64748b; font-size: 12px;">Enterprise Dashboard v2.0</p>
+    </div>
+    <div class="nav-tabs">
+        <button class="nav-btn active" onclick="switchPanel('geral', this)">Visão Geral</button>
+        <button class="nav-btn" onclick="switchPanel('perguntas', this)">Conteúdo</button>
+        <button class="nav-btn" onclick="switchPanel('metricas', this)">Analytics BI</button>
+    </div>
+</div>
 
-    <div class="card half">
-        <h3 style="margin:0 0 15px 0; font-weight: 800;">Nova Pergunta</h3>
-        <input type="text" id="new-q" placeholder="Texto da Pergunta">
-        <input type="text" id="new-o1" placeholder="Opção CORRETA" style="border-left: 4px solid var(--s)">
-        <input type="text" id="new-o2" placeholder="Opção Errada 1" style="border-left: 4px solid var(--e)">
-        <input type="text" id="new-o3" placeholder="Opção Errada 2" style="border-left: 4px solid var(--e)">
-        <input type="text" id="new-o4" placeholder="Opção Errada 3" style="border-left: 4px solid var(--e)">
-        <button class="btn" onclick="addQuestion()">ADICIONAR PERGUNTA</button>
+<div class="container">
+    <div id="panel-geral" class="panel active">
+        <div class="card"><span class="label">Participantes</span><span class="value" id="st-total">0</span></div>
+        <div class="card"><span class="label">Score Médio</span><span class="value" id="st-avg">0</span></div>
+        <div class="card" style="border-bottom: 3px solid var(--success)"><span class="label">Taxa Acerto</span><span class="value" id="st-hit" style="color:var(--success)">0%</span></div>
+        <div class="card" style="border-bottom: 3px solid var(--error)"><span class="label">Taxa Erro</span><span class="value" id="st-miss" style="color:var(--error)">0%</span></div>
+        
+        <div class="card full">
+            <h3 style="margin-top:0">Ranking de Performance</h3>
+            <table id="rank-table-geral">
+                <thead><tr><th>Colaborador</th><th>Pontos</th><th>Precisão</th><th>Data</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="card half">
-        <h3 style="margin:0 0 15px 0; font-weight: 800;">Perguntas Ativas</h3>
-        <div id="q-list" style="max-height: 280px; overflow-y: auto; font-size: 13px;">Carregando...</div>
+    <div id="panel-perguntas" class="panel">
+        <div class="card half">
+            <h3 style="margin-top:0">Nova Pergunta</h3>
+            <input type="text" id="new-q" placeholder="Título da Pergunta">
+            <input type="text" id="new-o1" placeholder="Resposta Correta" style="border-left: 3px solid var(--success)">
+            <input type="text" id="new-o2" placeholder="Opção 2">
+            <input type="text" id="new-o3" placeholder="Opção 3">
+            <input type="text" id="new-o4" placeholder="Opção 4">
+            <button class="btn-main" onclick="addQuestion()">PUBLICAR</button>
+        </div>
+        <div class="card half">
+            <h3 style="margin-top:0">Banco de Dados</h3>
+            <div id="q-list" style="max-height: 400px; overflow-y: auto;">Carregando...</div>
+        </div>
     </div>
 
-    <div class="card full">
-        <h3 style="margin:0 0 10px 0; font-weight: 800;">Desempenho (Rondonópolis)</h3>
-        <table id="rank-table">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Pontos</th>
-                    <th>Acertos</th>
-                    <th>Horário</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <button onclick="clearRanking()" style="background:none; border:none; color:var(--e); cursor:pointer; margin-top:20px; font-size:12px; font-weight: 600; letter-spacing: 0.5px;">ZERAR TODOS OS RESULTADOS</button>
+    <div id="panel-metricas" class="panel">
+        <div class="card half insight-card">
+            <span class="label">Top Performer</span>
+            <span class="value" id="bi-best-user">---</span>
+            <p style="font-size: 12px; color: #94a3b8; margin: 5px 0 0 0;">Colaborador com maior engajamento e acerto.</p>
+        </div>
+        <div class="card half insight-card" style="border-left-color: var(--success);">
+            <span class="label">Qualidade do Treinamento</span>
+            <span class="value" id="bi-health">Boa</span>
+            <p style="font-size: 12px; color: #94a3b8; margin: 5px 0 0 0;">Baseado na relação entre acertos e erros reais.</p>
+        </div>
+        <div class="card full">
+            <h3 style="margin-top:0">Relatório de Insights</h3>
+            <div id="bi-details" style="color: #cbd5e1; line-height: 1.6;">
+                <p>📊 <b>Análise:</b> Atualmente temos <span id="bi-q-count">0</span> perguntas ativas gerando dados para <span id="bi-p-count">0</span> colaboradores.</p>
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 20px 0;">
+                <p>Este painel pode ser expandido com gráficos de linha e barras usando a biblioteca Chart.js para mostrar a evolução diária dos treinamentos.</p>
+            </div>
+            <button class="btn-main" style="width: auto; padding: 10px 30px; background: rgba(255,255,255,0.05); color: #fff; font-size: 12px;" onclick="clearRanking()">ZERAR DADOS PARA NOVO CICLO</button>
+        </div>
     </div>
 </div>
 
 <script>
     const _supabase = supabase.createClient('https://zdthxlhknxpbdfzcozls.supabase.co', 'sb_publishable_6gT5fcstwt1QLjCf5PCAPA_2Ec_6mU4');
+
+    function switchPanel(panelId, btn) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('panel-' + panelId).classList.add('active');
+        btn.classList.add('active');
+    }
 
     async function load() {
         const { data: qs } = await _supabase.from('perguntas').select('*');
@@ -156,17 +164,20 @@
         if(qs) {
             document.getElementById('q-list').innerHTML = qs.map(q => `
                 <div class="q-item">
-                    <span>${q.pergunta}</span>
+                    <span style="font-size:13px">${q.pergunta}</span>
                     <button class="del-q" onclick="deleteQuestion(${q.id})">EXCLUIR</button>
                 </div>
             `).join('');
+            document.getElementById('bi-q-count').innerText = qs.length;
         }
-        if(rs) renderStats(rs, qs ? qs.length : 0);
+        if(rs) renderData(rs, qs ? qs.length : 0);
     }
 
-    function renderStats(data, totalQ) {
+    function renderData(data, totalQ) {
         const total = data.length;
+        document.getElementById('bi-p-count').innerText = total;
         document.getElementById('st-total').innerText = total;
+        
         const avg = total > 0 ? Math.round(data.reduce((a, b) => a + b.pontos, 0) / total) : 0;
         document.getElementById('st-avg').innerText = avg;
 
@@ -177,9 +188,15 @@
         document.getElementById('st-hit').innerText = perc + "%";
         document.getElementById('st-miss').innerText = (total > 0 ? 100 - perc : 0) + "%";
 
-        document.querySelector('#rank-table tbody').innerHTML = data.map(s => {
-            const time = s.criado_em ? new Date(s.criado_em).toLocaleString("pt-BR", {timeZone: "America/Cuiaba"}) : "---";
-            return `<tr><td><b style="color:#fff">${s.nome}</b></td><td>${s.pontos} pts</td><td>${s.acertos_reais || 0}/${totalQ}</td><td>${time}</td></tr>`;
+        // BI Insights
+        if(total > 0) {
+            document.getElementById('bi-best-user').innerText = data[0].nome;
+            document.getElementById('bi-health').innerText = perc > 70 ? "Alta Performance" : "Atenção Necessária";
+        }
+
+        document.querySelector('#rank-table-geral tbody').innerHTML = data.map(s => {
+            const time = s.criado_em ? new Date(s.criado_em).toLocaleDateString("pt-BR") : "---";
+            return `<tr><td>${s.nome}</td><td>${s.pontos}</td><td>${s.acertos_reais || 0}/${totalQ}</td><td>${time}</td></tr>`;
         }).join('');
     }
 
@@ -189,30 +206,16 @@
         const o2 = document.getElementById('new-o2').value;
         const o3 = document.getElementById('new-o3').value;
         const o4 = document.getElementById('new-o4').value;
-
-        if(!q || !o1 || !o2 || !o3 || !o4) return alert("Por favor, preencha a pergunta e todas as 4 opções!");
-
-        const { error } = await _supabase.from('perguntas').insert([{ 
-            pergunta: q, 
-            opcoes: [o1, o2, o3, o4], 
-            correta: 0 
-        }]);
-
-        if(error) alert("Erro ao salvar: " + error.message);
-        else {
-            document.querySelectorAll('input').forEach(i => i.value = ''); // Limpa inputs
-            load();
-        }
+        if(!q || !o1 || !o2 || !o3 || !o4) return alert("Preencha tudo!");
+        await _supabase.from('perguntas').insert([{ pergunta: q, opcoes: [o1, o2, o3, o4], correta: 0 }]);
+        location.reload();
     }
 
     async function deleteQuestion(id) {
-        if(confirm("Deseja realmente excluir esta pergunta?")) {
-            await _supabase.from('perguntas').delete().eq('id', id);
-            load();
-        }
+        if(confirm("Excluir?")) { await _supabase.from('perguntas').delete().eq('id', id); load(); }
     }
 
-    async function clearRanking() { if(confirm("Zerar ranking?")) { await _supabase.from('ranking').delete().neq('id', 0); load(); } }
+    async function clearRanking() { if(confirm("Zerar tudo?")) { await _supabase.from('ranking').delete().neq('id', 0); load(); } }
     
     load();
 </script>
