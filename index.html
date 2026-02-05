@@ -3,57 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnnoLog Quiz</title>
+    <title>Data & Recognition Quiz</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --p: #4A90E2; --s: #2ECC71; --dark: #2C3E50; --light: #F4F7F6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background: white; width: 92%; max-width: 450px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        :root { 
+            --p: #2563eb; /* Azul Tech */
+            --s: #10b981; /* Verde Success */
+            --dark: #0f172a; /* Slate Dark */
+            --light: #f8fafc; 
+            --accent: #6366f1; /* Violeta de IA */
+        }
+        
+        body { 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            background: radial-gradient(circle at top right, #e2e8f0, var(--light)); 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+
+        .container { 
+            background: white; 
+            width: 92%; 
+            max-width: 450px; 
+            padding: 30px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); 
+            text-align: center; 
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
         .hidden { display: none; }
-        .btn { background: var(--p); color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; font-size: 18px; margin: 10px 0; }
-        .option-btn { background: white; color: var(--dark); border: 2px solid #eee; text-align: left; font-size: 16px; }
-        #timer-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+
+        .btn { 
+            background: linear-gradient(135deg, var(--p), var(--accent)); 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 14px; 
+            cursor: pointer; 
+            width: 100%; 
+            font-weight: 600; 
+            font-size: 16px; 
+            margin: 12px 0; 
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+
+        .option-btn { 
+            background: #ffffff; 
+            color: var(--dark); 
+            border: 2px solid #f1f5f9; 
+            text-align: left; 
+            font-size: 15px; 
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .option-btn:hover { background: #f8fafc; border-color: var(--p); color: var(--p); }
+
+        #timer-bar { width: 100%; height: 6px; background: #f1f5f9; border-radius: 10px; margin: 20px 0; overflow: hidden; }
         #timer-fill { width: 100%; height: 100%; background: var(--s); transition: width 1s linear; }
-        input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #ddd; box-sizing: border-box; font-size: 16px; margin-bottom: 10px; }
+
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 12px; 
+            border: 2px solid #e2e8f0; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            margin-bottom: 15px; 
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: var(--p); }
+
+        .status-badge {
+            font-size: 12px;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #64748b;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
 <div class="container" id="screen-home">
-    <h1 style="color: var(--dark)">📊 <span style="color: var(--p)">OnnoLog</span> Quiz</h1>
-    <input type="text" id="username" placeholder="Seu Nome">
-    <button class="btn" onclick="startQuiz()">ENTRAR NO DESAFIO</button>
+    <div class="status-badge">DATA RECOGNITION SYSTEM V2.0</div>
+    <h1 style="color: var(--dark); margin-top: 10px;">🔍 <span style="color: var(--p)">OnnoLog</span> Insight</h1>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 25px;">Teste suas habilidades em Captura e Gestão de Dados.</p>
+    
+    <input type="text" id="username" placeholder="Identificação do Operador">
+    <button class="btn" onclick="startQuiz()">INICIAR PROCESSAMENTO</button>
 </div>
 
 <div class="container hidden" id="screen-quiz">
-    <div style="display:flex; justify-content:space-between; font-weight:bold;">
-        <span id="score-txt">0 pts</span>
-        <span id="timer-txt">30s</span>
+    <div style="display:flex; justify-content:space-between; align-items: center; font-family: monospace;">
+        <span id="score-txt" style="color: var(--p); font-size: 18px;">SCORE: 0000</span>
+        <span id="timer-txt" style="color: #64748b;">30s</span>
     </div>
     <div id="timer-bar"><div id="timer-fill"></div></div>
-    <h3 id="q-text" style="min-height: 50px;">Carregando...</h3>
+    
+    <div style="text-align: left; margin-bottom: 10px; color: #94a3b8; font-size: 12px; font-weight: bold;">INPUT DATA:</div>
+    <h3 id="q-text" style="min-height: 60px; margin-top: 0; color: var(--dark); line-height: 1.4;">Carregando bases...</h3>
+    
     <div id="options-box"></div>
 </div>
 
 <div class="container hidden" id="screen-ranking">
-    <h2>🏆 Melhores Pontuações</h2>
-    <div id="loading-ranking">Salvando resultado...</div>
-    <table id="ranking-table" class="hidden" style="width:100%; border-collapse: collapse;">
-        <thead><tr><th>Pos</th><th>Nome</th><th>Pontos</th></tr></thead>
-        <tbody></tbody>
+    <h2 style="color: var(--dark)">🏆 Ranking de Performance</h2>
+    <div id="loading-ranking" style="color: #64748b; padding: 20px;">Sincronizando banco de dados...</div>
+    
+    <table id="ranking-table" class="hidden" style="width:100%; border-collapse: collapse; margin-top: 10px;">
+        <thead style="border-bottom: 2px solid #f1f5f9; color: #64748b; font-size: 13px;">
+            <tr>
+                <th style="padding: 10px; text-align: left;">POS</th>
+                <th style="text-align: left;">OPERADOR</th>
+                <th style="text-align: right;">SCORE</th>
+            </tr>
+        </thead>
+        <tbody style="color: var(--dark); font-size: 15px;"></tbody>
     </table>
-    <button class="btn" onclick="location.reload()" style="margin-top:20px; background: var(--dark);">JOGAR NOVAMENTE</button>
+    
+    <button class="btn" onclick="location.reload()" style="margin-top:25px; background: var(--dark);">REINICIAR SISTEMA</button>
 </div>
 
 <script>
+    // Mantendo sua lógica original do Supabase e Quiz
     const _supabase = supabase.createClient('https://zdthxlhknxpbdfzcozls.supabase.co', 'sb_publishable_6gT5fcstwt1QLjCf5PCAPA_2Ec_6mU4');
     let questions = [], currentQ = 0, score = 0, acertosReais = 0, timeLeft = 30, timerInterval, user = "";
 
     async function startQuiz() {
         user = document.getElementById('username').value.trim();
-        if(!user) return alert("Por favor, digite Seu Nome!");
+        if(!user) return alert("Identificação necessária!");
         const { data, error } = await _supabase.from('perguntas').select('*');
-        if(error || !data || data.length === 0) return alert("Erro ao carregar perguntas ou banco vazio.");
+        if(error || !data || data.length === 0) return alert("Falha na conexão com o servidor de dados.");
         questions = data;
         document.getElementById('screen-home').classList.add('hidden');
         document.getElementById('screen-quiz').classList.remove('hidden');
@@ -80,16 +173,16 @@
     function updateTimer() {
         document.getElementById('timer-txt').innerText = timeLeft + "s";
         document.getElementById('timer-fill').style.width = (timeLeft/30*100) + "%";
-        document.getElementById('timer-fill').style.background = timeLeft < 10 ? "#e74c3c" : "#2ecc71";
+        document.getElementById('timer-fill').style.background = timeLeft < 10 ? "#ef4444" : "#10b981";
     }
 
     function handleAnswer(isCorrect) {
         clearInterval(timerInterval);
         if(isCorrect) {
             score += 500 + (timeLeft * 20);
-            acertosReais++; // Contador de acerto real
+            acertosReais++;
         }
-        document.getElementById('score-txt').innerText = score + " pts";
+        document.getElementById('score-txt').innerText = "SCORE: " + String(score).padStart(4, '0');
         currentQ++;
         setTimeout(showQuestion, 400);
     }
@@ -98,14 +191,13 @@
         document.getElementById('screen-quiz').classList.add('hidden');
         document.getElementById('screen-ranking').classList.remove('hidden');
         
-        // Salva com a nova coluna acertos_reais
         const { error } = await _supabase.from('ranking').insert([{ 
             nome: user, 
             pontos: score, 
             acertos_reais: acertosReais 
         }]);
 
-        if(error) console.error("Erro ao salvar ranking:", error);
+        if(error) console.error("Erro ao sincronizar dados:", error);
         showRanking();
     }
 
@@ -115,7 +207,12 @@
         const table = document.getElementById('ranking-table');
         table.classList.remove('hidden');
         const tbody = table.querySelector('tbody');
-        tbody.innerHTML = data.map((s, i) => `<tr style="border-bottom: 1px solid #eee;"><td style="padding:10px;"><b>${i+1}º</b></td><td>${s.nome}</td><td>${s.pontos}</td></tr>`).join('');
+        tbody.innerHTML = data.map((s, i) => `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding:12px; font-weight:bold;">#${i+1}</td>
+                <td>${s.nome}</td>
+                <td style="text-align:right; font-weight:bold; color:var(--p);">${s.pontos}</td>
+            </tr>`).join('');
     }
 </script>
 </body>
