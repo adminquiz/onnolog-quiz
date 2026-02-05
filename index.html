@@ -3,270 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnnoLog | Data Management & Recognition</title>
+    <title>OnnoLog | Dashboard Quiz</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --p: #4A90E2; 
-            --s: #2ECC71; 
-            --dark: #1E293B; 
-            --light: #F8FAFC;
-            --grad: linear-gradient(135deg, #4A90E2 0%, #2ECC71 100%);
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-        }
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: #E2E8F0; 
-            background-image: radial-gradient(at 0% 0%, rgba(74, 144, 226, 0.15) 0px, transparent 50%), 
-                              radial-gradient(at 100% 100%, rgba(46, 204, 113, 0.15) 0px, transparent 50%);
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
+        :root {
+            /* Cores Modo Claro (Baseadas no seu modelo) */
+            --bg-body: #f4f7f6;
+            --bg-card: #ffffff;
+            --text-main: #2C3E50;
+            --text-sub: #64748b;
+            --primary-grad: linear-gradient(135deg, #43919B 0%, #30AADD 100%);
+            --accent-grad: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            --border: #e2e8f0;
+            --input-bg: #f8fafc;
         }
 
-        .container { 
-            background: white; 
-            width: 92%; 
-            max-width: 420px; 
-            padding: 40px 30px; 
-            border-radius: 24px; 
-            box-shadow: var(--shadow); 
+        [data-theme="dark"] {
+            /* Cores Modo Escuro */
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --border: #334155;
+            --input-bg: #0f172a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* Toggle Dark Mode */
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            background: var(--bg-card);
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .container {
+            background: var(--bg-card);
+            width: 90%;
+            max-width: 450px;
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.8);
+            border: 1px solid var(--border);
         }
 
-        /* Identidade Visual */
-        .logo-area { margin-bottom: 32px; }
+        /* Header & Logo */
+        .header { margin-bottom: 30px; }
         .brand {
             font-weight: 800;
-            font-size: 32px;
-            letter-spacing: -1px;
-            background: var(--grad);
+            font-size: 28px;
+            background: var(--primary-grad);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            display: block;
         }
-        .subtitle {
+        .tagline {
             font-size: 10px;
-            font-weight: 600;
-            color: #94A3B8;
-            letter-spacing: 2px;
             text-transform: uppercase;
-            margin-top: 4px;
+            letter-spacing: 2px;
+            color: var(--text-sub);
+            margin-top: 5px;
         }
 
-        /* Inputs e Botões */
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { font-size: 12px; font-weight: 600; color: var(--dark); margin-left: 4px; }
-        
-        input { 
-            width: 100%; 
-            padding: 14px 18px; 
-            border-radius: 12px; 
-            border: 2px solid #F1F5F9; 
-            box-sizing: border-box; 
-            font-size: 16px; 
+        /* Inputs (EDT) */
+        .field { text-align: left; margin-bottom: 20px; }
+        label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-left: 5px; }
+        input {
+            width: 100%;
+            padding: 14px;
             margin-top: 6px;
-            transition: all 0.2s ease;
-            background: #F8FAFC;
-        }
-
-        input:focus {
-            border-color: var(--p);
-            background: white;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-size: 16px;
+            box-sizing: border-box;
             outline: none;
-            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+            transition: border-color 0.2s;
         }
+        input:focus { border-color: #43919B; }
 
-        .btn { 
-            background: var(--grad); 
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-weight: 600; 
-            font-size: 16px; 
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+        /* Buttons */
+        .btn {
+            background: var(--primary-grad);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
         }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
-            filter: brightness(1.05);
-        }
-
-        /* Quiz UI */
-        #timer-bar { width: 100%; height: 6px; background: #F1F5F9; border-radius: 10px; margin: 20px 0; overflow: hidden; }
-        #timer-fill { width: 100%; height: 100%; background: var(--grad); transition: width 1s linear; }
-        
-        .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .stat-box { font-size: 14px; font-weight: 800; color: var(--dark); font-family: monospace; }
-
-        .question-text {
-            font-size: 18px;
-            color: var(--dark);
-            line-height: 1.5;
-            margin: 24px 0;
-            min-height: 60px;
-        }
-
-        .option-btn { 
-            background: white; 
-            color: var(--dark); 
-            border: 2px solid #F1F5F9; 
-            text-align: left; 
+        .option-btn {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 2px solid var(--border);
+            text-align: left;
             margin-bottom: 12px;
             font-weight: 500;
         }
+        .option-btn:hover { border-color: #43919B; background: var(--input-bg); }
 
-        .option-btn:hover {
-            border-color: var(--p);
-            background: #F0F7FF;
-        }
+        /* Quiz Specifics */
+        .stats { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; margin-bottom: 10px; color: #43919B; }
+        #timer-bar { width: 100%; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 25px; }
+        #timer-fill { height: 100%; background: var(--accent-grad); width: 100%; transition: width 1s linear; }
 
         /* Ranking Table */
-        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 20px; }
-        th { font-size: 11px; color: #94A3B8; text-transform: uppercase; padding: 0 10px; }
-        td { padding: 12px 10px; background: #F8FAFC; font-size: 14px; }
-        td:first-child { border-radius: 8px 0 0 8px; font-weight: 800; color: var(--p); }
-        td:last-child { border-radius: 0 8px 8px 0; text-align: right; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { font-size: 10px; color: var(--text-sub); text-transform: uppercase; padding: 10px; text-align: left; }
+        td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 14px; text-align: left; }
+        .pos { font-weight: 800; color: #43919B; }
+        .score-val { font-weight: 700; text-align: right; }
 
         .hidden { display: none; }
     </style>
 </head>
-<body>
+<body data-theme="light">
 
-<div class="container" id="screen-home">
-    <div class="logo-area">
-        <span class="brand">OnnoLog</span>
-        <div class="subtitle">Data Management & Recognition</div>
-    </div>
-    
-    <div class="input-group">
-        <label>IDENTIFICAÇÃO DO OPERADOR</label>
-        <input type="text" id="username" placeholder="Digite seu nome ou ID...">
-    </div>
-    
-    <button class="btn" onclick="startQuiz()">INICIAR PROCESSAMENTO</button>
-</div>
-
-<div class="container hidden" id="screen-quiz">
-    <div class="stats-header">
-        <div class="stat-box" id="score-txt" style="color: var(--p);">SCORE: 0000</div>
-        <div class="stat-box" id="timer-txt">30s</div>
-    </div>
-    <div id="timer-bar"><div id="timer-fill"></div></div>
-    
-    <div class="question-text" id="q-text">Sincronizando banco de dados...</div>
-    <div id="options-box"></div>
-</div>
-
-<div class="container hidden" id="screen-ranking">
-    <div class="logo-area" style="margin-bottom: 15px;">
-        <span class="brand" style="font-size: 24px;">Performance Analytics</span>
-        <div class="subtitle">Global Leaderboard</div>
+    <div class="theme-switch" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span> <span id="theme-text">Modo Escuro</span>
     </div>
 
-    <div id="loading-ranking" style="color: #94A3B8; font-size: 14px; padding: 20px;">Atualizando logs...</div>
-    
-    <table id="ranking-table" class="hidden">
-        <thead>
-            <tr>
-                <th align="left">Pos</th>
-                <th align="left">Operador</th>
-                <th align="right">Pts</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    
-    <button class="btn" onclick="location.reload()" style="margin-top:25px;">NOVA VARREDURA</button>
-</div>
+    <div class="container" id="screen-home">
+        <div class="header">
+            <span class="brand">OnnoLog Quiz</span>
+            <div class="tagline">Data Management & Recognition</div>
+        </div>
+        <div class="field">
+            <label>IDENTIFICAÇÃO DO COLABORADOR</label>
+            <input type="text" id="username" placeholder="Digite seu nome...">
+        </div>
+        <button class="btn" onclick="startQuiz()">ACESSAR PAINEL</button>
+    </div>
 
-<script>
-    const _supabase = supabase.createClient('https://zdthxlhknxpbdfzcozls.supabase.co', 'sb_publishable_6gT5fcstwt1QLjCf5PCAPA_2Ec_6mU4');
-    let questions = [], currentQ = 0, score = 0, acertosReais = 0, timeLeft = 30, timerInterval, user = "";
+    <div class="container hidden" id="screen-quiz">
+        <div class="stats">
+            <span id="score-txt">SCORE: 0000</span>
+            <span id="timer-txt">30s</span>
+        </div>
+        <div id="timer-bar"><div id="timer-fill"></div></div>
+        <h3 id="q-text" style="margin-bottom: 25px; line-height: 1.4;">Carregando dados...</h3>
+        <div id="options-box"></div>
+    </div>
 
-    async function startQuiz() {
-        user = document.getElementById('username').value.trim();
-        if(!user) return alert("Erro: Operador não identificado.");
-        
-        const { data, error } = await _supabase.from('perguntas').select('*');
-        if(error || !data || data.length === 0) return alert("Erro na extração de dados.");
-        
-        questions = data;
-        document.getElementById('screen-home').classList.add('hidden');
-        document.getElementById('screen-quiz').classList.remove('hidden');
-        showQuestion();
-    }
+    <div class="container hidden" id="screen-ranking">
+        <div class="header" style="margin-bottom: 15px;">
+            <span class="brand" style="font-size: 20px;">Relatório de Performance</span>
+        </div>
+        <div id="loading-ranking" style="font-size: 12px; color: var(--text-sub);">Sincronizando logs...</div>
+        <table id="ranking-table" class="hidden">
+            <thead>
+                <tr>
+                    <th>POS</th>
+                    <th>COLABORADOR</th>
+                    <th style="text-align:right">SCORE</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button class="btn" onclick="location.reload()" style="margin-top:25px;">NOVO TESTE</button>
+    </div>
 
-    function showQuestion() {
-        if(currentQ >= questions.length) return endQuiz();
-        timeLeft = 30; updateTimer();
-        const data = questions[currentQ];
-        document.getElementById('q-text').innerText = data.pergunta;
-        
-        const box = document.getElementById('options-box'); box.innerHTML = "";
-        let opts = data.opcoes.map((o, i) => ({o, i})).sort(() => Math.random() - 0.5);
-        
-        opts.forEach(item => {
-            const b = document.createElement('button');
-            b.className = "btn option-btn"; b.innerText = item.o;
-            b.onclick = () => handleAnswer(item.i === data.correta);
-            box.appendChild(b);
-        });
-        
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => { 
-            timeLeft--; 
-            updateTimer(); 
-            if(timeLeft <= 0) handleAnswer(false); 
-        }, 1000);
-    }
+    <script>
+        const _supabase = supabase.createClient('https://zdthxlhknxpbdfzcozls.supabase.co', 'sb_publishable_6gT5fcstwt1QLjCf5PCAPA_2Ec_6mU4');
+        let questions = [], currentQ = 0, score = 0, acertosReais = 0, timeLeft = 30, timerInterval, user = "";
 
-    function updateTimer() {
-        document.getElementById('timer-txt').innerText = timeLeft + "s";
-        document.getElementById('timer-fill').style.width = (timeLeft/30*100) + "%";
-    }
-
-    function handleAnswer(isCorrect) {
-        clearInterval(timerInterval);
-        if(isCorrect) {
-            score += 500 + (timeLeft * 20);
-            acertosReais++;
+        // Lógica de Tema
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            document.getElementById('theme-icon').innerText = isDark ? '🌙' : '☀️';
+            document.getElementById('theme-text').innerText = isDark ? 'Modo Escuro' : 'Modo Claro';
         }
-        document.getElementById('score-txt').innerText = "SCORE: " + String(score).padStart(4, '0');
-        currentQ++;
-        setTimeout(showQuestion, 300);
-    }
 
-    async function endQuiz() {
-        document.getElementById('screen-quiz').classList.add('hidden');
-        document.getElementById('screen-ranking').classList.remove('hidden');
-        await _supabase.from('ranking').insert([{ nome: user, pontos: score, acertos_reais: acertosReais }]);
-        showRanking();
-    }
+        // Lógica do Quiz (Mantida conforme sua necessidade)
+        async function startQuiz() {
+            user = document.getElementById('username').value.trim();
+            if(!user) return alert("Por favor, insira sua identificação.");
+            const { data, error } = await _supabase.from('perguntas').select('*');
+            if(error || !data.length) return alert("Erro ao conectar com a base de dados.");
+            questions = data;
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            showQuestion();
+        }
 
-    async function showRanking() {
-        const { data } = await _supabase.from('ranking').select('*').order('pontos', { ascending: false }).limit(8);
-        document.getElementById('loading-ranking').classList.add('hidden');
-        const table = document.getElementById('ranking-table');
-        table.classList.remove('hidden');
-        const tbody = table.querySelector('tbody');
-        tbody.innerHTML = data.map((s, i) => `
-            <tr>
-                <td>#${i+1}</td>
-                <td>${s.nome}</td>
-                <td>${s.pontos}</td>
-            </tr>`).join('');
-    }
-</script>
+        function showQuestion() {
+            if(currentQ >= questions.length) return endQuiz();
+            timeLeft = 30; updateTimer();
+            const data = questions[currentQ];
+            document.getElementById('q-text').innerText = data.pergunta;
+            const box = document.getElementById('options-box'); box.innerHTML = "";
+            let opts = data.opcoes.map((o, i) => ({o, i})).sort(() => Math.random() - 0.5);
+            opts.forEach(item => {
+                const b = document.createElement('button');
+                b.className = "btn option-btn"; b.innerText = item.o;
+                b.onclick = () => handleAnswer(item.i === data.correta);
+                box.appendChild(b);
+            });
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => { timeLeft--; updateTimer(); if(timeLeft <= 0) handleAnswer(false); }, 1000);
+        }
+
+        function updateTimer() {
+            document.getElementById('timer-txt').innerText = timeLeft + "s";
+            document.getElementById('timer-fill').style.width = (timeLeft/30*100) + "%";
+        }
+
+        function handleAnswer(isCorrect) {
+            clearInterval(timerInterval);
+            if(isCorrect) { score += 500 + (timeLeft * 20); acertosReais++; }
+            document.getElementById('score-txt').innerText = "SCORE: " + String(score).padStart(4, '0');
+            currentQ++;
+            setTimeout(showQuestion, 300);
+        }
+
+        async function endQuiz() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-ranking').classList.remove('hidden');
+            await _supabase.from('ranking').insert([{ nome: user, pontos: score, acertos_reais: acertosReais }]);
+            showRanking();
+        }
+
+        async function showRanking() {
+            const { data } = await _supabase.from('ranking').select('*').order('pontos', { ascending: false }).limit(6);
+            document.getElementById('loading-ranking').classList.add('hidden');
+            const table = document.getElementById('ranking-table');
+            table.classList.remove('hidden');
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = data.map((s, i) => `
+                <tr>
+                    <td class="pos">#${i+1}</td>
+                    <td>${s.nome}</td>
+                    <td class="score-val">${s.pontos}</td>
+                </tr>`).join('');
+        }
+    </script>
 </body>
 </html>
