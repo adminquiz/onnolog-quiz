@@ -7,23 +7,52 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* Variáveis de Cor - Modo Escuro (Padrão) */
         :root { 
             --primary: #818cf8; --success: #10b981; --error: #f43f5e; 
             --bg: #020617; --card-bg: rgba(15, 23, 42, 0.7);
+            --text-main: #f8fafc; --text-muted: #64748b;
+            --border: rgba(255, 255, 255, 0.08);
             --gold: #fbbf24; --silver: #94a3b8; --bronze: #d97706;
+            --input-bg: rgba(0,0,0,0.2);
+            --btn-bg: #ffffff; --btn-text: #000000;
+        }
+
+        /* Variáveis de Cor - Modo Claro */
+        [data-theme="light"] {
+            --bg: #f1f5f9; --card-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #1e293b; --text-muted: #64748b;
+            --border: rgba(0, 0, 0, 0.1);
+            --input-bg: #ffffff;
+            --btn-bg: #1e293b; --btn-text: #ffffff;
         }
 
         body { 
-            font-family: 'Inter', sans-serif; background: radial-gradient(circle at top right, #1e1b4b, #020617);
-            background-attachment: fixed; color: #f8fafc; min-height: 100vh; margin: 0; 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg);
+            background-image: radial-gradient(circle at top right, rgba(129, 140, 248, 0.1), transparent);
+            background-attachment: fixed; 
+            color: var(--text-main); 
+            min-height: 100vh; margin: 0; 
             display: flex; flex-direction: column; align-items: center; padding-bottom: 50px;
+            transition: background 0.3s, color 0.3s;
         }
 
-        /* Nav & Layout */
-        .header { width: 100%; max-width: 1100px; padding: 40px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .nav-tabs { display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px; }
-        .nav-btn { padding: 10px 20px; border: none; background: none; color: #64748b; cursor: pointer; font-weight: 600; border-radius: 8px; transition: 0.3s; }
-        .nav-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
+        /* Toggle Theme Button */
+        .theme-switch {
+            position: fixed; top: 20px; right: 20px;
+            background: var(--card-bg); border: 1px solid var(--border);
+            padding: 8px 15px; border-radius: 20px; cursor: pointer;
+            font-size: 12px; font-weight: 700; color: var(--text-main);
+            backdrop-filter: blur(10px); z-index: 1000;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Layout */
+        .header { width: 100%; max-width: 1100px; padding: 40px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .nav-tabs { display: flex; gap: 10px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 12px; }
+        .nav-btn { padding: 10px 20px; border: none; background: none; color: var(--text-muted); cursor: pointer; font-weight: 600; border-radius: 8px; transition: 0.3s; }
+        .nav-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
         .container { width: 100%; max-width: 1100px; padding: 0 20px; box-sizing: border-box; }
         .panel { display: none; animation: fadeIn 0.4s ease-out; }
@@ -31,70 +60,63 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Cards */
-        .card { background: var(--card-bg); backdrop-filter: blur(20px); padding: 24px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); }
+        .card { background: var(--card-bg); backdrop-filter: blur(20px); padding: 24px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .full { grid-column: span 4; } .half { grid-column: span 2; }
-        .label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         .value { font-size: 32px; font-weight: 800; display: block; margin-top: 5px; }
 
-        /* --- PODIUM STYLES --- */
-        .podium-container { 
-            display: flex; justify-content: center; align-items: flex-end; 
-            height: 250px; margin: 40px 0 20px; gap: 10px;
-        }
-        .podium-step { 
-            display: flex; flex-direction: column; align-items: center; 
-            width: 120px; position: relative;
-        }
-        .step-block { width: 100%; border-radius: 12px 12px 0 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 24px; color: rgba(255,255,255,0.2); }
-        
-        /* Alturas e Cores do Pódio */
-        .first .step-block { height: 120px; background: linear-gradient(to top, #78350f, var(--gold)); color: #fff; box-shadow: 0 0 30px rgba(251, 191, 36, 0.3); }
+        /* Pódio */
+        .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 250px; margin: 40px 0 20px; gap: 10px; }
+        .podium-step { display: flex; flex-direction: column; align-items: center; width: 120px; }
+        .step-block { width: 100%; border-radius: 12px 12px 0 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 24px; }
+        .first .step-block { height: 120px; background: linear-gradient(to top, #78350f, var(--gold)); color: #fff; }
         .second .step-block { height: 80px; background: linear-gradient(to top, #334155, var(--silver)); color: #fff; }
         .third .step-block { height: 60px; background: linear-gradient(to top, #92400e, var(--bronze)); color: #fff; }
-
         .avatar { font-size: 40px; margin-bottom: 10px; animation: celebrate 1s ease-in-out infinite alternate; }
-        .podium-name { font-size: 12px; font-weight: 700; margin-bottom: 8px; text-align: center; white-space: nowrap; width: 100px; overflow: hidden; text-overflow: ellipsis; color: #fff; }
-        
         @keyframes celebrate { from { transform: translateY(0); } to { transform: translateY(-15px); } }
-        .second .avatar { animation-delay: 0.2s; }
-        .third .avatar { animation-delay: 0.4s; }
 
-        /* Tabela & Inputs (mantidos) */
+        /* Tabela & Form */
         table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-        td { padding: 16px; background: rgba(255, 255, 255, 0.03); border: none; color: #e2e8f0; }
+        td { padding: 16px; background: rgba(128, 128, 128, 0.05); border: none; color: var(--text-main); }
         td:first-child { border-radius: 12px 0 0 12px; font-weight: 600; }
-        td:last-child { border-radius: 0 12px 12px 0; color: #64748b; font-size: 12px; }
-        input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(0,0,0,0.2); color: white; }
-        .btn-main { background: #fff; color: #000; border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; margin-top: 10px; }
-        .q-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; }
+        td:last-child { border-radius: 0 12px 12px 0; color: var(--text-muted); font-size: 12px; }
+        input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid var(--border); border-radius: 12px; background: var(--input-bg); color: var(--text-main); outline: none; }
+        .btn-main { background: var(--btn-bg); color: var(--btn-text); border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; margin-top: 10px; transition: 0.3s; }
+        .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
+        .q-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
         .del-q { color: var(--error); cursor: pointer; border: none; background: none; font-size: 10px; font-weight: bold; }
+
+        @media (max-width: 768px) { .panel.active { grid-template-columns: 1fr; } .half, .full { grid-column: span 1; } .header { flex-direction: column; gap: 20px; text-align: center; } }
     </style>
 </head>
-<body>
+<body data-theme="dark">
+
+<button class="theme-switch" onclick="toggleTheme()">
+    <span id="theme-icon">🌙</span> <span id="theme-text">Modo Escuro</span>
+</button>
 
 <div class="header">
     <div>
         <h1 style="margin:0; font-size: 24px; letter-spacing: -1px;">OnnoLog <span style="font-weight:300; color:var(--primary)">Intelligence</span></h1>
-        <p style="margin:0; color: #64748b; font-size: 12px;">Data Management & Recognition</p>
+        <p style="margin:0; color: var(--text-muted); font-size: 12px;">Data Management & Recognition</p>
     </div>
     <div class="nav-tabs">
-        <button class="nav-btn active" onclick="switchPanel('geral', this)">Visão Geral</button>
-        <button class="nav-btn" onclick="switchPanel('perguntas', this)">Gestão de Perguntas</button>
-        <button class="nav-btn" onclick="switchPanel('metricas', this)">Ranking</button>
+        <button class="nav-btn active" onclick="switchPanel('geral', this)">Geral</button>
+        <button class="nav-btn" onclick="switchPanel('perguntas', this)">Conteúdo</button>
+        <button class="nav-btn" onclick="switchPanel('metricas', this)">BI & Pódio</button>
     </div>
 </div>
 
 <div class="container">
     <div id="panel-geral" class="panel active">
-        <div class="card"><span class="label">Total Colaboradores</span><span class="value" id="st-total">0</span></div>
+        <div class="card"><span class="label">Participantes</span><span class="value" id="st-total">0</span></div>
         <div class="card"><span class="label">Média Global</span><span class="value" id="st-avg">0</span></div>
-        <div class="card" style="border-bottom: 3px solid var(--success)"><span class="label">Taxa de Acerto</span><span class="value" id="st-hit" style="color:var(--success)">0%</span></div>
-        <div class="card" style="border-bottom: 3px solid var(--error)"><span class="label">Necessita Suporte</span><span class="value" id="st-miss" style="color:var(--error)">0%</span></div>
-        
+        <div class="card" style="border-bottom: 3px solid var(--success)"><span class="label">Taxa Acerto</span><span class="value" id="st-hit" style="color:var(--success)">0%</span></div>
+        <div class="card" style="border-bottom: 3px solid var(--error)"><span class="label">Taxa Erro</span><span class="value" id="st-miss" style="color:var(--error)">0%</span></div>
         <div class="card full">
-            <h3 style="margin-top:0">Relatório de Performance (Rondonópolis)</h3>
+            <h3 style="margin-top:0">Relatório de Performance</h3>
             <table id="rank-table-geral">
-                <thead><tr><th>Colaborador</th><th>Score</th><th>Precisão</th><th>Última Atividade</th></tr></thead>
+                <thead><tr><th>Colaborador</th><th>Score</th><th>Precisão</th><th>Data</th></tr></thead>
                 <tbody></tbody>
             </table>
         </div>
@@ -102,57 +124,57 @@
 
     <div id="panel-perguntas" class="panel">
         <div class="card half">
-            <h3 style="margin-top:0">Configurar Avaliação</h3>
-            <input type="text" id="new-q" placeholder="Pergunta Estratégica">
-            <input type="text" id="new-o1" placeholder="Resposta Correta (KPI)" style="border-left: 3px solid var(--success)">
+            <h3 style="margin-top:0">Nova Pergunta</h3>
+            <input type="text" id="new-q" placeholder="Pergunta">
+            <input type="text" id="new-o1" placeholder="Resposta Correta" style="border-left: 3px solid var(--success)">
             <input type="text" id="new-o2" placeholder="Opção 2">
             <input type="text" id="new-o3" placeholder="Opção 3">
             <input type="text" id="new-o4" placeholder="Opção 4">
-            <button class="btn-main" onclick="addQuestion()">PUBLICAR AGORA</button>
+            <button class="btn-main" onclick="addQuestion()">PUBLICAR</button>
         </div>
         <div class="card half">
-            <h3 style="margin-top:0">Bases de Conhecimento Ativas</h3>
-            <div id="q-list" style="max-height: 400px; overflow-y: auto;">Carregando banco...</div>
+            <h3 style="margin-top:0">Banco de Dados</h3>
+            <div id="q-list" style="max-height: 400px; overflow-y: auto;">Carregando...</div>
         </div>
     </div>
 
     <div id="panel-metricas" class="panel">
-        <div class="card full" style="text-align: center; background: radial-gradient(circle at bottom, rgba(99, 102, 241, 0.15), transparent);">
-            <span class="label">Ranking de Reconhecimento</span>
-            
+        <div class="card full" style="text-align: center;">
+            <span class="label">Elite de Performance</span>
             <div class="podium-container">
-                <div class="podium-step second">
-                    <div class="avatar">🥈</div>
-                    <div class="podium-name" id="podium-2-name">---</div>
-                    <div class="step-block">2</div>
-                </div>
-                <div class="podium-step first">
-                    <div class="avatar">👑</div>
-                    <div class="podium-name" id="podium-1-name" style="font-size: 14px; font-weight: 800; color: var(--gold);">---</div>
-                    <div class="step-block">1</div>
-                </div>
-                <div class="podium-step third">
-                    <div class="avatar">🥉</div>
-                    <div class="podium-name" id="podium-3-name">---</div>
-                    <div class="step-block">3</div>
-                </div>
+                <div class="podium-step second"><div class="avatar">🥈</div><div id="podium-2-name" style="color: var(--text-main); font-weight: 700; margin-bottom: 5px;">---</div><div class="step-block">2</div></div>
+                <div class="podium-step first"><div class="avatar">👑</div><div id="podium-1-name" style="color: var(--gold); font-weight: 800; margin-bottom: 5px; font-size: 16px;">---</div><div class="step-block">1</div></div>
+                <div class="podium-step third"><div class="avatar">🥉</div><div id="podium-3-name" style="color: var(--text-main); font-weight: 700; margin-bottom: 5px;">---</div><div class="step-block">3</div></div>
             </div>
-            
-            <p style="color: #64748b; font-size: 13px; margin-top: 20px;">Performance calculada com base em Score Total e Precisão de Respostas.</p>
         </div>
-
-        <div class="card full" style="background: rgba(255,255,255,0.02)">
-            <h3 style="margin-top:0">Ações Administrativas</h3>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-main" style="flex:1; background: rgba(255,255,255,0.05); color: #fff;" onclick="window.print()">EXPORTAR PDF</button>
-                <button class="btn-main" style="flex:1; background: rgba(244, 63, 94, 0.1); color: var(--error);" onclick="clearRanking()">ZERAR CICLO ATUAL</button>
-            </div>
+        <div class="card full">
+            <button class="btn-main" style="background: var(--error); color: #fff;" onclick="clearRanking()">ZERAR TODOS OS RESULTADOS</button>
         </div>
     </div>
 </div>
 
 <script>
     const _supabase = supabase.createClient('https://zdthxlhknxpbdfzcozls.supabase.co', 'sb_publishable_6gT5fcstwt1QLjCf5PCAPA_2Ec_6mU4');
+
+    // Lógica de Tema
+    function toggleTheme() {
+        const body = document.body;
+        const icon = document.getElementById('theme-icon');
+        const text = document.getElementById('theme-text');
+        
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.setAttribute('data-theme', 'light');
+            icon.innerText = '☀️'; text.innerText = 'Modo Claro';
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            icon.innerText = '🌙'; text.innerText = 'Modo Escuro';
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    // Carregar tema salvo
+    if(localStorage.getItem('theme') === 'light') toggleTheme();
 
     function switchPanel(panelId, btn) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -164,10 +186,7 @@
     async function load() {
         const { data: qs } = await _supabase.from('perguntas').select('*');
         const { data: rs } = await _supabase.from('ranking').select('*').order('pontos', { ascending: false });
-        
-        if(qs) {
-            document.getElementById('q-list').innerHTML = qs.map(q => `<div class="q-item"><span>${q.pergunta}</span><button class="del-q" onclick="deleteQuestion(${q.id})">EXCLUIR</button></div>`).join('');
-        }
+        if(qs) document.getElementById('q-list').innerHTML = qs.map(q => `<div class="q-item"><span>${q.pergunta}</span><button class="del-q" onclick="deleteQuestion(${q.id})">EXCLUIR</button></div>`).join('');
         if(rs) renderData(rs, qs ? qs.length : 0);
     }
 
@@ -175,44 +194,29 @@
         document.getElementById('st-total').innerText = data.length;
         const avg = data.length > 0 ? Math.round(data.reduce((a, b) => a + b.pontos, 0) / data.length) : 0;
         document.getElementById('st-avg').innerText = avg;
-
         const hits = data.reduce((a, b) => a + (b.acertos_reais || 0), 0);
-        const totalPossible = data.length * totalQ;
-        const perc = totalPossible > 0 ? Math.round((hits / totalPossible) * 100) : 0;
-
+        const perc = (data.length * totalQ) > 0 ? Math.round((hits / (data.length * totalQ)) * 100) : 0;
         document.getElementById('st-hit').innerText = perc + "%";
         document.getElementById('st-miss').innerText = (100 - perc) + "%";
 
-        // --- Lógica do Pódio ---
         if(data.length >= 1) document.getElementById('podium-1-name').innerText = data[0].nome;
         if(data.length >= 2) document.getElementById('podium-2-name').innerText = data[1].nome;
         if(data.length >= 3) document.getElementById('podium-3-name').innerText = data[2].nome;
 
-        document.querySelector('#rank-table-geral tbody').innerHTML = data.map(s => {
-            const time = s.criado_em ? new Date(s.criado_em).toLocaleDateString("pt-BR") : "---";
-            return `<tr><td>${s.nome}</td><td>${s.pontos} <span style="font-size:10px; color:#64748b">pts</span></td><td>${s.acertos_reais || 0}/${totalQ}</td><td>${time}</td></tr>`;
-        }).join('');
+        document.querySelector('#rank-table-geral tbody').innerHTML = data.map(s => `<tr><td>${s.nome}</td><td>${s.pontos}</td><td>${s.acertos_reais || 0}/${totalQ}</td><td>${s.criado_em ? new Date(s.criado_em).toLocaleDateString() : '---'}</td></tr>`).join('');
     }
 
     async function addQuestion() {
         const q = document.getElementById('new-q').value;
-        const o1 = document.getElementById('new-o1').value;
-        const o2 = document.getElementById('new-o2').value;
-        const o3 = document.getElementById('new-o3').value;
-        const o4 = document.getElementById('new-o4').value;
-        if(!q || !o1 || !o2 || !o3 || !o4) return alert("Preencha todos os campos!");
-        await _supabase.from('perguntas').insert([{ pergunta: q, opcoes: [o1, o2, o3, o4], correta: 0 }]);
+        const ops = [document.getElementById('new-o1').value, document.getElementById('new-o2').value, document.getElementById('new-o3').value, document.getElementById('new-o4').value];
+        if(!q || ops.includes('')) return alert("Preencha tudo!");
+        await _supabase.from('perguntas').insert([{ pergunta: q, opcoes: ops, correta: 0 }]);
         location.reload();
     }
 
-    async function deleteQuestion(id) {
-        if(confirm("Excluir pergunta?")) { await _supabase.from('perguntas').delete().eq('id', id); load(); }
-    }
-
-    async function clearRanking() { if(confirm("Deseja zerar todos os resultados?")) { await _supabase.from('ranking').delete().neq('id', 0); load(); } }
-    
+    async function deleteQuestion(id) { if(confirm("Excluir?")) { await _supabase.from('perguntas').delete().eq('id', id); load(); } }
+    async function clearRanking() { if(confirm("Zerar?")) { await _supabase.from('ranking').delete().neq('id', 0); load(); } }
     load();
 </script>
 </body>
 </html>
-
