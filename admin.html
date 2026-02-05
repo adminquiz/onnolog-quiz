@@ -2,26 +2,108 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>OnnoLog ADM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnnoLog ADM - Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #6366f1; --s: #22c55e; --e: #ef4444; --bg: #f8fafc; --dark: #1e293b; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--dark); padding: 40px; margin: 0; }
-        .dashboard { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-top: 4px solid var(--p); }
-        .card.success { border-top-color: var(--s); }
-        .card.error { border-top-color: var(--e); }
+        :root { 
+            --p: #6366f1; 
+            --s: #10b981; 
+            --e: #f43f5e; 
+            --dark: #0f172a; 
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            /* Fundo Animado com Gradiente */
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+            background-size: 400% 400%;
+            animation: gradientBg 15s ease infinite;
+            color: #f8fafc; 
+            min-height: 100vh;
+            padding: 40px 20px; 
+            margin: 0; 
+            display: flex;
+            justify-content: center;
+        }
+
+        @keyframes gradientBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .dashboard { 
+            max-width: 1100px; 
+            width: 100%;
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 20px; 
+        }
+
+        /* Glassmorphism Card */
+        .card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            padding: 24px; 
+            border-radius: 24px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover { transform: translateY(-5px); border-color: rgba(255, 255, 255, 0.2); }
+
+        .card.success { border-top: 4px solid var(--s); }
+        .card.error { border-top: 4px solid var(--e); }
+
         .full { grid-column: span 4; }
         .half { grid-column: span 2; }
-        .label { font-size: 14px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-        .value { font-size: 32px; font-weight: 700; display: block; margin-top: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 12px; overflow: hidden; }
-        th { background: #f1f5f9; text-align: left; padding: 16px; font-size: 13px; color: #64748b; }
-        td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .btn { background: var(--p); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 10px; }
-        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; }
-        .q-item { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .del-q { color: var(--e); cursor: pointer; border: none; background: none; font-size: 11px; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            .half, .card { grid-column: span 4; }
+        }
+
+        .label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .value { font-size: 36px; font-weight: 800; display: block; margin-top: 8px; color: #fff; }
+
+        /* Tabela Estilizada */
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 15px; }
+        th { text-align: left; padding: 12px 16px; font-size: 13px; color: #94a3b8; }
+        td { padding: 16px; background: rgba(255, 255, 255, 0.03); font-size: 14px; border: none; color: #e2e8f0; }
+        td:first-child { border-radius: 12px 0 0 12px; }
+        td:last-child { border-radius: 0 12px 12px 0; }
+        tr:hover td { background: rgba(255, 255, 255, 0.07); }
+
+        .btn { 
+            background: linear-gradient(135deg, var(--p), #4f46e5); 
+            color: white; border: none; padding: 14px; border-radius: 12px; 
+            cursor: pointer; font-weight: 700; width: 100%; margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s;
+        }
+        .btn:hover { filter: brightness(1.2); transform: scale(1.01); }
+
+        input { 
+            width: 100%; padding: 12px; margin: 10px 0; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 10px; box-sizing: border-box; 
+            background: rgba(0,0,0,0.3); color: white;
+            outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--p); background: rgba(0,0,0,0.4); }
+
+        .q-item { 
+            padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+        .del-q { color: var(--e); cursor: pointer; border: none; background: none; font-size: 11px; font-weight: bold; opacity: 0.6; }
+        .del-q:hover { opacity: 1; }
+        
+        #q-list::-webkit-scrollbar { width: 6px; }
+        #q-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -33,7 +115,7 @@
     <div class="card error"><span class="label">% Erro Real</span><span class="value" id="st-miss" style="color:var(--e)">0%</span></div>
 
     <div class="card half">
-        <h3 style="margin-top:0">Nova Pergunta</h3>
+        <h3 style="margin:0 0 15px 0; font-weight: 800;">Nova Pergunta</h3>
         <input type="text" id="new-q" placeholder="Texto da Pergunta">
         <input type="text" id="new-o1" placeholder="Opção CORRETA" style="border-left: 4px solid var(--s)">
         <input type="text" id="new-o2" placeholder="Opção Errada 1" style="border-left: 4px solid var(--e)">
@@ -43,17 +125,24 @@
     </div>
 
     <div class="card half">
-        <h3 style="margin-top:0">Perguntas Ativas</h3>
-        <div id="q-list" style="max-height: 250px; overflow-y: auto; font-size: 13px;">Carregando...</div>
+        <h3 style="margin:0 0 15px 0; font-weight: 800;">Perguntas Ativas</h3>
+        <div id="q-list" style="max-height: 280px; overflow-y: auto; font-size: 13px;">Carregando...</div>
     </div>
 
     <div class="card full">
-        <h3 style="margin-top:0">Desempenho (Rondonópolis)</h3>
+        <h3 style="margin:0 0 10px 0; font-weight: 800;">Desempenho (Rondonópolis)</h3>
         <table id="rank-table">
-            <thead><tr><th>Nome</th><th>Pontos</th><th>Acertos</th><th>Horário</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Pontos</th>
+                    <th>Acertos</th>
+                    <th>Horário</th>
+                </tr>
+            </thead>
             <tbody></tbody>
         </table>
-        <button onclick="clearRanking()" style="background:none; border:none; color:var(--e); cursor:pointer; margin-top:20px; font-size:12px;">ZERAR TODOS OS RESULTADOS</button>
+        <button onclick="clearRanking()" style="background:none; border:none; color:var(--e); cursor:pointer; margin-top:20px; font-size:12px; font-weight: 600; letter-spacing: 0.5px;">ZERAR TODOS OS RESULTADOS</button>
     </div>
 </div>
 
@@ -90,7 +179,7 @@
 
         document.querySelector('#rank-table tbody').innerHTML = data.map(s => {
             const time = s.criado_em ? new Date(s.criado_em).toLocaleString("pt-BR", {timeZone: "America/Cuiaba"}) : "---";
-            return `<tr><td><b>${s.nome}</b></td><td>${s.pontos} pts</td><td>${s.acertos_reais || 0}/${totalQ}</td><td>${time}</td></tr>`;
+            return `<tr><td><b style="color:#fff">${s.nome}</b></td><td>${s.pontos} pts</td><td>${s.acertos_reais || 0}/${totalQ}</td><td>${time}</td></tr>`;
         }).join('');
     }
 
@@ -110,7 +199,10 @@
         }]);
 
         if(error) alert("Erro ao salvar: " + error.message);
-        else location.reload();
+        else {
+            document.querySelectorAll('input').forEach(i => i.value = ''); // Limpa inputs
+            load();
+        }
     }
 
     async function deleteQuestion(id) {
